@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 require('longjohn');
 
 var outQueue = require('./out_queue');

@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "nTrace runner",
   "main": "index.js",
+  "bin": {
+    "ntrace-runner": "./index.js"
+  },
   "author": "pgte",
   "dependencies": {
     "reconnect": "~1.5.2",
