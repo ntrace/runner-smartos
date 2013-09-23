@@ -80,8 +80,8 @@ function run(uuid, owner, repo, commit, cb) {
 }
 
 function prepare(zone, cb) {
-  log('preparing zone'.yellow);
-  zone.events.write({level: 'info', message: 'preparing zone'});
+  log('preparing zone %s'.yellow, zone.uuid);
+  zone.events.write({level: 'info', message: 'preparing worker ' + zone.uuid});
   seq(zone, [
       ['mkdir -p repo'],
       ['mkdir -p .npm'],
