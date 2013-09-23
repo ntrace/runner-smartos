@@ -26,7 +26,7 @@ function execute(dir, script) {
     env: env
   };
   console.log('executing', options);
-  console.log('script', script);
+  console.log('script: `', script + '`');
 
   var child = spawn('bash', ['-c', script], options);
 
