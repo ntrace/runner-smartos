@@ -11,7 +11,7 @@ findRepoRoot(function(err, root) {
   if (err) throw err;
   findScript(root, function(err, script) {
     if (err) throw err;
-    execute(__dirname + '/repo/' + root, script);
+    execute(__dirname + '/repo/' + root, '../../dtrace.sh "' + script + '"');
   });
 });
 
@@ -25,25 +25,13 @@ function execute(dir, script) {
     cwd: dir,
     env: env
   };
-  console.log('executing', options);
-  console.log('script: `', script + '`');
 
   var child = spawn('bash', ['-c', script], options);
 
-  child.stdout.setEncoding('utf8');
-  child.stdout.on('data', console.log);
-  child.stderr.setEncoding('utf8');
-  child.stderr.on('data', console.log);
-
-  var out = fs.createWriteStream('stdout.out');
-  out.write('\n$ ' + script + '\n');
-  child.stdout.pipe(out);
-
-  var err = fs.createWriteStream('stderr.out');
-  child.stderr.pipe(out);
+  child.stdout.pipe(process.stdout);
+  child.stderr.pipe(process.stderr);
 
   child.once('exit', function(code) {
-    console.log('child exited with code')
     process.exit(code);
   });
 }

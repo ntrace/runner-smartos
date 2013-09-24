@@ -43,7 +43,6 @@ function run(uuid, owner, repo, commit, cb) {
     downloadRepo       .bind(null, zone, repoURL, commit),
     installRepo        .bind(null, zone, repoURL),
     placeDtrace        .bind(null, zone),
-    startTailingScript .bind(null, zone),
     startDtrace        .bind(null, zone)
   ], allDone);
 
@@ -53,28 +52,13 @@ function run(uuid, owner, repo, commit, cb) {
     var ellapsedTime = Math.round((Date.now() - startTime) / 1000);
     zone.events.write({level: 'info', code: 'finish', message: 'finished after ' + ellapsedTime + ' seconds'});
 
-    async.parallel([
-      zone.kill.bind(zone, 'tail stdout'),
-      zone.kill.bind(zone, 'tail stderr')
-    ], killedTails);
-
-    function killedTails(err) {
-      if (err) {
-        err.message = 'Error killing tail process:' + err.message;
-        console.error(err.stack);
-      }
-    }
-
     zone.result.end();
     zone.events.end();
 
-    // give some time for the stdout tails to end
-    setTimeout(function() {
-      zone.stdout.end();
-      zone.stderr.end();
-      zone.events.end();
-      cb(err);
-    }, 5000);
+    zone.stdout.end();
+    zone.stderr.end();
+    zone.events.end();
+    cb(err);
 
   }
 }
@@ -88,9 +72,7 @@ function prepare(zone, cb) {
       ['chown -R nobody.nobody .'],
       ['npm config set cache /root/.npm'],
       ['npm --global config set cache /root/.npm'],
-      ['npm --global config set color always'],
-      'touch stdout.out',
-      'touch stderr.out'
+      ['npm --global config set color always']
     ], cb);
 }
 
@@ -144,16 +126,6 @@ function placeDtrace(zone, cb) {
   ], cb);
 }
 
-function startTailingScript(zone, cb) {
-  var stdout = zone.spawn('tail stdout', 'tail -fF stdout.out', []);
-  var stderr = zone.spawn('tail stderr', 'tail -fF stderr.out', []);
-
-  stdout.stdout.pipe(zone.stdout, {end: false});
-  stderr.stdout.pipe(zone.stderr, {end: false});
-
-  cb();
-}
-
 
 function startDtrace(zone, cb) {
   zone.events.write({level: 'trace', message: 'starting DTrace script'});
@@ -168,7 +140,7 @@ function startDtrace(zone, cb) {
 
   log('about to start dtrace'.yellow);
 
-  var cmd = '/root/dtrace.sh';
+  var cmd = '/root/run.js';
 
   var dtrace = zone.__dtrace = zone.spawn('dtrace', cmd, []);
   dtrace.once('error', callback);

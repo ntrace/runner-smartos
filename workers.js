@@ -109,6 +109,8 @@ function makeAvailable(worker) {
 function clean(worker) {
   var uuid = worker.uuid;
 
+  return onRolledBack();
+
   if (process.env.FAKE_RUN) {
     process.nextTick(onRolledBack);
   } else {
