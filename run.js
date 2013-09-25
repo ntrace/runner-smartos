@@ -146,6 +146,7 @@ function startDtrace(zone, cb) {
   dtrace.once('error', callback);
 
   dtrace.stdout.pipe(zone.result);
+  dtrace.stderr.pipe(zone.stderr);
 
   dtrace.once('exit', function() {
     log('dtrace exited'.yellow);
